@@ -129,7 +129,229 @@ for usuario in generar_datos_usuarios(100):
 
 ## Decoradores
 
+Los decoradores en Python son una herramienta poderosa para modificar o extender la funcionalidad de funciones o métodos sin alterar su código original. Implementan el patrón de diseño decorador, que permite añadir comportamiento adicional a objetos de manera dinámica.
+
 ### Closures
+Un closure (o clausura) es una técnica que permite que una función recuerde el entorno en el que fue creada, incluso después de que la función externa haya terminado su ejecución. Los decoradores en Python a menudo se basan en closures para mantener el estado y el contexto.
+
+```python 
+def decorator(func):
+  def wrapper(*args, **kwargs):
+    print(f"Arguments: {args}, {kwargs}")
+    return func(*args, **kwargs)
+  return wrapper
+
+@decorator
+def say_hello(name):
+  print(f"Hello, {name}")
+
+say_hello("Alice")
+```
+
+### Funciones revisted (como por cuarta vez)
+En Python, las funciones pueden ser pasadas como argumentos a otras funciones. Esto es fundamental para los decoradores, que toman una función como argumento y devuelven una nueva función que envuelve la original.
+
+```python 
+# concepto basico de closure
+def create_adder(base_number):
+  print("Before returning the function")
+  def adder(number):
+    return base_number + number
+  print("After returning the function")
+  return adder
+
+add_five = create_adder(5)
+print(add_five(3)) 
+```
+
+```python 
+def wrapper(func):
+  def inner(*args, **kwargs):
+    print("Before calling function")
+    result = func(*args, **kwargs)
+    print("After calling function")
+    return result
+  return inner
+
+@wrapper
+def add(a, b):
+  return a + b
+
+print(add(2, 3))
+```
 
 
+### Definción (formal)
+Un decorador es una función que toma otra función y le añade algún comportamiento adicional. El decorador devuelve una nueva función que envuelve a la original.
 
+**Ejemplo:** Decorador de Temporización
+
+```python 
+import time
+
+def timing_decorator(func):
+  def wrapper(*args, **kwargs):
+    start_time = time.time()
+    result = func(*args, **kwargs)
+    end_time = time.time()
+    print(f"Execution time: {end_time - start_time:.4f} seconds")
+    return result
+  return wrapper
+
+@timing_decorator
+def slow_function(seconds):
+  time.sleep(seconds)
+  return "Done"
+
+print(slow_function(2))
+```
+
+```mermaid
+classDiagram
+  class Function {
+    +__call__()
+  }
+  class Decorator {
+    +__init__(func)
+    +__call__(*args, **kwargs)
+  }
+  class TimingDecorator {
+    +__init__(func)
+    +__call__(*args, **kwargs)
+  }
+
+  Function <|-- Decorator
+  Decorator <|-- TimingDecorator
+```
+
+### Uso del `@`
+El símbolo @ se utiliza en Python para aplicar decoradores de manera más legible y directa. Esto es un atajo que hace que el código sea más claro y conciso.
+
+```python 
+@timing_decorator
+def example_function():
+  pass
+```
+
+### Casos de Uso 
+
+1. Validación de Entradas de Usuario: Los decoradores pueden ser usados para validar entradas antes de que una función procese los datos.
+
+```python 
+def validate_inputs(func):
+  def wrapper(*args, **kwargs):
+    if not all(isinstance(arg, int) for arg in args):
+      raise ValueError("All arguments must be integers")
+    return func(*args, **kwargs)
+  return wrapper
+
+@validate_inputs
+def add_numbers(a, b):
+  return a + b
+
+print(add_numbers(1, 2))
+```
+
+2. Registro de Actividades: Los decoradores son útiles para registrar información sobre la ejecución de funciones.
+
+```python 
+def log_activity(func):
+  def wrapper(*args, **kwargs):
+    print(f"Executing {func.__name__} with arguments: {args}, {kwargs}")
+    return func(*args, **kwargs)
+  return wrapper
+
+@log_activity
+def process_data(data):
+  return data.upper()
+
+print(process_data("sample text"))
+```
+
+3. Autenticación de Usuarios: Se puede usar un decorador para verificar si un usuario tiene los permisos necesarios antes de ejecutar una función.
+
+```python 
+def require_login(func):
+  def wrapper(user, *args, **kwargs):
+    if not user.get('logged_in'):
+      raise PermissionError("User must be logged in")
+    return func(user, *args, **kwargs)
+  return wrapper
+
+@require_login
+def access_resource(user):
+  return "Resource accessed"
+
+user = {'logged_in': True}
+print(access_resource(user))
+```
+
+### Decoradores Comunes en Python
+
++ `@staticmethod`: Define un método que no recibe una referencia al objeto (self).
+
+```python 
+class MyClass:
+  @staticmethod
+  def static_method():
+    return "Static method called"
+```
+
++ `@classmethod`: Define un método que recibe una referencia a la clase (cls) en lugar de una instancia.
+
+```python 
+class MyClass:
+  @classmethod
+  def class_method(cls):
+    return "Class method called"
+```
+
++ `@property`: Define un método que puede ser accedido como un atributo.
+
+```python 
+class MyClass:
+  @property
+  def my_property(self):
+    return "Property value"
+```
+
++ `@functools.lru_cache`: Cachea los resultados de una función para mejorar la eficiencia.
+
+```python 
+from functools import lru_cache
+
+@lru_cache(maxsize=None)
+def expensive_function(x):
+  return x ** 2
+```
+
++ `@singledispatch`: Permite definir funciones sobrecargadas basadas en el tipo del primer argumento. Desde Python 3.4 en adelante.
+
+```python 
+from functools import singledispatch
+
+@singledispatch
+def process(value):
+  return f"Processing {value}"
+
+@process.register(int)
+def _(value):
+  return f"Processing integer {value}"
+
+@process.register(str)
+def _(value):
+  return f"Processing string {value}"
+
+print(process(10))    # Output: Processing integer 10
+print(process("test"))  # Output: Processing string test
+```
+
+**Fuentes:**
+ + [Python Decorators That Can Reduce Your Code By Half](https://medium.com/@ayush-thakur02/python-decorators-that-can-reduce-your-code-by-half-b19f673bc7d8)
+ + [Mastering Python Decorators: A Comprehensive Guide for Enhancing Code Modularity and Functionality](https://medium.com/@ewho.ruth2014/mastering-python-decorators-a-comprehensive-guide-for-enhancing-code-modularity-and-818ae455260d)
+ + [https://levelup.gitconnected.com/how-works-in-python-1f3ca1aac731](https://levelup.gitconnected.com/how-works-in-python-1f3ca1aac731)
+ + [8 Python Decorator Things I Regret Not Knowing Earlier](https://levelup.gitconnected.com/8-python-decorator-things-i-regret-not-knowing-earlier-6e886619d75c)
+ + Python 3 Object Oriented Programming - Chap 10.
+
+## Reto 8
+Be creative
