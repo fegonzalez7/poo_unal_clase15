@@ -129,5 +129,7 @@ for usuario in generar_datos_usuarios(100):
 
 ## Decoradores
 
+### Closures
+
 
 
