@@ -456,8 +456,8 @@ def expensive_function(x):
  + [8 Python Decorator Things I Regret Not Knowing Earlier](https://levelup.gitconnected.com/8-python-decorator-things-i-regret-not-knowing-earlier-6e886619d75c)
  + Python 3 Object Oriented Programming - Chap 10.
 
-## Reto 9
-Our very last challenge.
+## Reto 7
+Our very last challenge (maybe).
 
 1. Add the @property decorator into the package Shape, so all the protected data could be accessed this way.
 2. Add @classmethod decorator to Shape, in order to change define and change the type of shape of each class.
