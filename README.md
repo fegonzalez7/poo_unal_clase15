@@ -4,7 +4,7 @@
 
 ## Generadores
 
-Los generadores son una función especial en Python que permiten iterar de forma eficiente y perezosa. En lugar de devolver todos los valores de una vez (como con return), los generadores producen valores uno a uno bajo demanda mediante la palabra clave yield. Cada vez que se invoca al generador, este devuelve un valor y pausa su ejecución, reanudándola en el siguiente yield.
+Los generadores son una función especial en Python que permiten iterar de forma eficiente y *perezosa*. En lugar de devolver todos los valores de una vez (como con `return`), los generadores producen valores uno a uno bajo demanda mediante la palabra clave `yield`. Cada vez que se invoca al generador, este devuelve un valor y pausa su ejecución, reanudándola en el siguiente `yield`.
 
 ```python 
 def contador(n):
@@ -18,7 +18,7 @@ for num in contador(5):
 
 ### `yield`
 
-La palabra clave yield convierte una función en un generador. A diferencia de return, no termina la ejecución de la función, sino que la suspende, recordando el estado para continuar posteriormente.
+La palabra clave `yield` convierte una función en un generador. A diferencia de `return`, no termina la ejecución de la función, sino que la suspende, recordando el estado para continuar posteriormente.
 
 ```python 
 def generador_simple():
@@ -118,6 +118,56 @@ def generar_datos_usuarios(num_usuarios):
 # Generar y mostrar datos de 100 usuarios
 for usuario in generar_datos_usuarios(100):
   print(usuario)
+```
+
+```python
+# Ejemplo completo
+from memory_profiler import memory_usage
+import random
+import time
+from typing import Generator
+
+nombres = ['Juan', 'Ana', 'Alicia', 'Roberto']
+carreras = ['Ingeniería', 'Medicina', 'Derecho', 'Arquitectura']
+
+print(f"Memoria inicial: {memory_usage()[0]} MB")
+
+
+def lista_personas(cant_personas: int) -> list:
+    resultado: list = []
+    for i in range(cant_personas):
+        persona = {
+            'id': i,
+            'nombre': random.choice(nombres),
+            'carrera': random.choice(carreras),
+            'edad': random.randint(18, 30)
+        }
+        resultado.append(persona)
+    return resultado
+
+def generador_personas(cant_personas: int) -> Generator[dict, None, None]:
+    for i in range(cant_personas):
+        persona = {
+            'id': i,
+            'nombre': random.choice(nombres),
+            'carrera': random.choice(carreras),
+            'edad': random.randint(18, 30)
+        }
+        yield persona
+
+
+tiempo_inicio = time.time()
+# personas = generador_personas(1_000_000)
+personas = lista_personas(1_000_000)
+print(type(personas))
+for idx, persona in enumerate(personas):
+    if idx % 10000 == 0:
+        print(persona)
+
+tiempo_fin = time.time()
+
+print(f"Tiempo de ejecución: {tiempo_fin - tiempo_inicio} segundos")
+print(f"Memoria final: {memory_usage()[0]} MB")
 ```
 
 **Fuentes:**
